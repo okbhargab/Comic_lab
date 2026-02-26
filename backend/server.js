@@ -3,8 +3,10 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
+import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import uploadRoutes from "./routes/uploads.js";
+import Review from "./models/Review.js";
 
 dotenv.config();
 
@@ -13,6 +15,9 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || "";
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,9 +25,19 @@ app.use("/uploads", express.static(path.resolve("uploads")));
 app.use("/api/auth", authRoutes);
 app.use("/api/uploads", uploadRoutes);
 
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+});
+
 app.get("/", (req, res) => {
   res.json({ message: "Comics Studies Lab backend is running" });
 });
+
+
+
+
 
 async function startServer() {
   if (!MONGODB_URI) {
